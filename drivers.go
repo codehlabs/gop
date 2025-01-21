@@ -2,7 +2,6 @@ package gop
 
 import (
 	"context"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -33,7 +32,7 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 		projection = bson.D{{"phone", 1}}
 	}
 
-	filter = append(filter, bson.E{"password", password})
+	filter = append(filter)
 	projection = append(projection, bson.E{"password", 1}, bson.E{"salt", 1})
 	ctx := context.Background()
 	defer md.client.Disconnect(ctx)
