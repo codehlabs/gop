@@ -3,11 +3,10 @@ package gop
 import (
 	"context"
 	"fmt"
-	"os"
-	"testing"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"os"
+	"testing"
 )
 
 type UseDb struct {

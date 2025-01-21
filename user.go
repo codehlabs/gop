@@ -55,8 +55,6 @@ func (a Address) String() string {
 }
 
 func (u User) Save(db Db) error {
-	u.Id = u.Email
-	u.CreatedAt = time.Now()
 	return db.Save(u)
 }
 
