@@ -21,11 +21,11 @@ type User struct {
 	Phone     string    `bson:"phone" form:"phone"`
 	Age       int32     `bson:"age"`
 	DOB       time.Time `bson:"dob" form:"dob"` // Date of Birth
-	Address   Address   `bson:"address"`
+	Address   Address   `bson:"address,omitempty"`
 	Profile   any       `bson:"profile"` // Platform related profile
 	CreatedAt time.Time `bson:"created_at"`
-	UpdatedAt time.Time `bson:"updated_at"`
-	DeletedAt time.Time `bson:"deleted_at"`
+	UpdatedAt time.Time `bson:"updated_at,omitempty"`
+	DeletedAt time.Time `bson:"deleted_at,omitempty"`
 }
 
 func (u *User) HashAndSalt() (err error) {
@@ -65,7 +65,7 @@ func (u User) Save(db Db) error {
 
 	u.CreatedAt = time.Now()
 
-	age := u.DOB.Sub(time.Now())
+	age := time.Now().Sub(u.DOB)
 	u.Age = int32(age.Hours() / 24 / 365)
 
 	return db.Save(u)
