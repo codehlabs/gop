@@ -17,6 +17,7 @@ type MongoADriver struct {
 	collection *mongo.Collection
 }
 
+// Authenticates [User] in the system using username, email of phone
 func (md MongoADriver) Login(username, email, phone string, password string) (id string, err error) {
 	filter := bson.D{}
 	projection := bson.D{}
