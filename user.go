@@ -120,7 +120,7 @@ func bind_form_data(r *http.Request, data interface{}) error {
 				}
 			case reflect.Struct:
 				if structField.Type() == reflect.TypeOf(time.Time{}) {
-					parsedTime, err := time.Parse(time.RFC3339, formValue)
+					parsedTime, err := time.Parse("2006-01-02", formValue)
 					if err == nil {
 						structField.Set(reflect.ValueOf(parsedTime))
 					}
