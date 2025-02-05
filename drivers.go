@@ -61,6 +61,28 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	return u.Id, nil
 }
 
+func (md MongoADriver) Save(u User) error {
+
+	_, err := md.collection.InsertOne(context.Background(), u)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (md MongoADriver) Update(u User) error {
+	return nil
+}
+
+func (md MongoADriver) Delete(id string) error {
+	return nil
+}
+
+func (md MongoADriver) Read(id string) (User, error) {
+	return User{}, nil
+}
+
 func NewMongoADriver(conn string, databaseName string, collection string) (MongoADriver, error) {
 	ctx := context.Background()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conn))
