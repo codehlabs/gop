@@ -58,6 +58,16 @@ func (a Address) String() string {
 }
 
 func (u User) Save(db Db) error {
+
+	if err := u.HashAndSalt(); err != nil {
+		return err
+	}
+
+	u.CreatedAt = time.Now()
+
+	age := u.DOB.Sub(time.Now())
+	u.Age = int32(age.Hours() / 24 / 365)
+
 	return db.Save(u)
 }
 
