@@ -10,6 +10,18 @@ import (
 	"time"
 )
 
+type Config struct {
+	UseBuiltInSaveLogic bool // when calling [User] to save it will use the custom built in logic
+	UniqueIDLength      int  // defines built int unique id seed length
+}
+
+var config = &Config{UseBuiltInSaveLogic: true}
+
+// Set Custom configuration
+func SetConfig(c Config) {
+	config = &c
+}
+
 type User struct {
 	Id        string    `bson:"_id"`
 	Username  string    `bson:"username" form:"username"`
@@ -59,14 +71,23 @@ func (a Address) String() string {
 
 func (u User) Save(db Db) error {
 
-	if err := u.HashAndSalt(); err != nil {
-		return err
+	if config.UseBuiltInSaveLogic {
+		if err := u.HashAndSalt(); err != nil {
+			return err
+		}
+		u.CreatedAt = time.Now()
+		age := time.Now().Sub(u.DOB)
+		u.Age = int32(age.Hours() / 24 / 365)
+		seed_length := config.UniqueIDLength
+		if seed_length == 0 {
+			seed_length = 16
+		}
+		uid, err := unique_id(seed_length)
+		if err != nil {
+			return err
+		}
+		u.Id = uid
 	}
-
-	u.CreatedAt = time.Now()
-
-	age := time.Now().Sub(u.DOB)
-	u.Age = int32(age.Hours() / 24 / 365)
 
 	return db.Save(u)
 }
