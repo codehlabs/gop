@@ -6,11 +6,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/tursodatabase/go-libsql"
 	"reflect"
 	"slices"
 	"strings"
 	"time"
+
+	_ "github.com/tursodatabase/go-libsql"
 )
 
 var (
@@ -129,11 +130,10 @@ func (r ORM) CreateTable(model interface{}, tablename string) error {
 		t = reflect.TypeOf(model)
 	}
 
-	tbname := tablename
-	if tbname == "" {
-		tbname = strings.ToLower(t.Name())
-		if !strings.HasSuffix(tbname, "s") {
-			tbname = tbname + "s"
+	if tablename == "" {
+		tablename = strings.ToLower(t.Name())
+		if !strings.HasSuffix(tablename, "s") {
+			tablename = tablename + "s"
 		}
 	}
 
@@ -149,8 +149,14 @@ func (r ORM) CreateTable(model interface{}, tablename string) error {
 		}
 
 		if sql_tag == "" {
-			//TODO: need to add a check for times
 			if field.Type.Kind() == reflect.Struct {
+
+				if field.Type == reflect.TypeOf(time.Time{}) {
+					column_name := sanitize_keyword(column_line)
+					columns = append(columns, fmt.Sprintf("%s INTEGER", column_name))
+					continue
+				}
+
 				_, err := process_inner_struct(field.Type, r.db, "")
 				if err != nil {
 					return err
@@ -158,11 +164,7 @@ func (r ORM) CreateTable(model interface{}, tablename string) error {
 				continue
 			}
 
-			column_name := strings.ToLower(field.Name)
-			_, ok := keywords[column_name]
-			if ok {
-				column_name = fmt.Sprintf("[%s]", column_name)
-			}
+			column_name := sanitize_keyword(field.Name)
 
 			column_line = fmt.Sprintf("%s TEXT", column_name)
 			columns = append(columns, column_line)
@@ -172,6 +174,7 @@ func (r ORM) CreateTable(model interface{}, tablename string) error {
 		tags := strings.Split(sql_tag, ",")
 
 		if len(tags) == 1 {
+
 			if field.Type.Kind() == reflect.Struct {
 				if tags[0] == "flatten" {
 					flatten_columns, err := process_inner_struct(field.Type, r.db, "flatten")
@@ -193,7 +196,7 @@ func (r ORM) CreateTable(model interface{}, tablename string) error {
 
 	}
 
-	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", tbname, strings.Join(columns, ","))
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", tablename, strings.Join(columns, ","))
 
 	_, err := r.db.Exec(query)
 	if err != nil {
@@ -235,11 +238,7 @@ func process_inner_struct(t reflect.Type, db *sql.DB, tag string) ([]string, err
 				continue
 			}
 
-			column_name := strings.ToLower(field.Name)
-			_, ok := keywords[column_name]
-			if ok {
-				column_name = fmt.Sprintf("[%s]", column_name)
-			}
+			column_name := sanitize_keyword(field.Name)
 
 			column_line = fmt.Sprintf("%s TEXT", column_name)
 			columns = append(columns, column_line)
@@ -307,6 +306,16 @@ func handle_time(field reflect.Value, columntype string, tags []string) string {
 	}
 
 	return ""
+}
+
+// Chekcs if the column_name is a SQL keyword and wraps it
+func sanitize_keyword(column_name string) string {
+	column_name = strings.ToLower(column_name)
+	_, ok := keywords[column_name]
+	if !ok {
+		return column_name
+	}
+	return fmt.Sprintf("[%s]", column_name)
 }
 
 // Raw query

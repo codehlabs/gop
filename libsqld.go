@@ -2,69 +2,59 @@ package gop
 
 import (
 	"database/sql"
-	"fmt"
 
+	"github.com/racg0092/gop/rdb"
 	_ "github.com/tursodatabase/go-libsql"
 )
 
 type LibSqlADriver struct {
 	dbpath string
-	db     *sql.DB
+	orm    rdb.ORM
 }
 
 // Creates a new LibSql Driver where dbpath is the database and usertable is the table
 // to save the users to
-func NewLibSqlADriver(dbpath, usertable string) (LibSqlADriver, error) {
+func NewLibSqlADriver(dbpath string) (LibSqlADriver, error) {
 	driver := LibSqlADriver{dbpath: dbpath}
-	db, err := sql.Open("libsql", dbpath)
+	orm, err := rdb.Open("libsql", dbpath)
 	if err != nil {
 		return driver, err
 	}
-	driver.db = db
+	driver.orm = orm
 	return driver, nil
 }
 
 // Check is table exists in the database
 func tableExists(driver LibSqlADriver, table string) (bool, error) {
 	var name string
-	err := driver.db.QueryRow(`
-    select name
-    from sqlite_master
-    where type='table'
-    and name =?
-  `, table).Scan(&name)
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
+	var err error
+	driver.orm.Raw(func(db *sql.DB) {
+		err = db.QueryRow(`
+      select name
+      from sqlite_master
+      where type='table'
+      and name =?
+      `, table).Scan(&name)
+		if err == sql.ErrNoRows {
+			return
+		}
+		if err != nil {
+			return
+		}
+		return
+	})
 	if err != nil {
 		return false, err
 	}
-	return true, nil
+	return true, err
 }
 
 // Creates user table
 func createUserTable(driver LibSqlADriver, tablename string) error {
-	query := fmt.Sprintf(`
-  CREATE TABLE IF NOT EXISTS %s (
-    id TEXT PRIMARY KEY,
-    username TEXT NOT NULL,
-    firstname TEXT NOT NULL,
-    lastname TEXT NOT NULL,
-    password TEXT NOT NULL,
-    salt TEXT NOT NULL,
-    email TEXT NULL,
-    phone TEXT NULL,
-    age INTEGER NULL,
-    dob INTEGER NULL,
-    created_at INTEGER DEFAULT CURRENT_TIMESTAMP,
-    updated_at INTEGER NULL
-  );
-  `, tablename)
-
-	_, err := driver.db.Exec(query)
+	u := User{}
+	err := driver.orm.CreateTable(u, tablename)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

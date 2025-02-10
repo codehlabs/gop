@@ -34,7 +34,7 @@ type User struct {
 	Age       int32     `bson:"age" sql:"age,integer"`
 	DOB       time.Time `bson:"dob" form:"dob" sql:"dob,integer"` // Date of Birth
 	Address   Address   `bson:"address,omitempty"`
-	Profile   any       `bson:"profile" sql:"omit"` // Platform related profile
+	Profile   any       `bson:"profile" sql:"omit"` // Domain defined profile
 	CreatedAt time.Time `bson:"created_at" sql:"created_at,integer"`
 	UpdatedAt time.Time `bson:"updated_at,omitempty" sql:"updated_at,integer"`
 	DeletedAt time.Time `bson:"deleted_at,omitempty" sql:"deleted_at,integer"`
