@@ -12,3 +12,14 @@ func TestUID(t *testing.T) {
 	}
 	fmt.Println(id)
 }
+
+func TestSecurePsswd(t *testing.T) {
+	err := SecurePassword(
+		"thecatandthelionwentonawalkdowntheriverside",
+		true,
+		false,
+	)
+	if err != nil {
+		t.Error(err)
+	}
+}

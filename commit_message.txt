@@ -1,0 +1,27 @@
+
+deleted drivers.go page
+
+
+added more errors and an error struct to handle more complext errors use cases
+
+
+libsql dependy added. note: need to add a driver for sqlite itself as well
+
+changed the tests for gop_test file
+
+
+mongod.go is the new file for the mongo action driver
+
+
+added the sql tags for the user struct
+
+added the sql tags for the address struct
+
+
+added a security passwod fucntion to utils
+
+
+added test suit for utils
+
+
+

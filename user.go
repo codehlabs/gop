@@ -23,21 +23,21 @@ func SetConfig(c Config) {
 }
 
 type User struct {
-	Id        string    `bson:"_id"`
-	Username  string    `bson:"username" form:"username"`
-	FirsName  string    `bson:"firstname" form:"firstname"`
-	LastName  string    `bson:"lastname" form:"lastname"`
-	Password  string    `bson:"password" form:"password"`
-	Salt      string    `bson:"salt"`
-	Email     string    `bson:"email" form:"email"`
-	Phone     string    `bson:"phone" form:"phone"`
-	Age       int32     `bson:"age"`
-	DOB       time.Time `bson:"dob" form:"dob"` // Date of Birth
+	Id        string    `bson:"_id" sql:"id,text,unique"`
+	Username  string    `bson:"username" form:"username" sql:"username,text"`
+	FirsName  string    `bson:"firstname" form:"firstname" sql:"firstname,text"`
+	LastName  string    `bson:"lastname" form:"lastname" sql:"lastname,text"`
+	Password  string    `bson:"password" form:"password" sql:"password,text"`
+	Salt      string    `bson:"salt" sql:"salt,text"`
+	Email     string    `bson:"email" form:"email" sql:"email,text"`
+	Phone     string    `bson:"phone" form:"phone" sql:"phone,text"`
+	Age       int32     `bson:"age" sql:"age,integer"`
+	DOB       time.Time `bson:"dob" form:"dob" sql:"dob,integer"` // Date of Birth
 	Address   Address   `bson:"address,omitempty"`
-	Profile   any       `bson:"profile"` // Platform related profile
-	CreatedAt time.Time `bson:"created_at"`
-	UpdatedAt time.Time `bson:"updated_at,omitempty"`
-	DeletedAt time.Time `bson:"deleted_at,omitempty"`
+	Profile   any       `bson:"profile" sql:"omit"` // Platform related profile
+	CreatedAt time.Time `bson:"created_at" sql:"created_at,integer"`
+	UpdatedAt time.Time `bson:"updated_at,omitempty" sql:"updated_at,integer"`
+	DeletedAt time.Time `bson:"deleted_at,omitempty" sql:"deleted_at,integer"`
 }
 
 func (u *User) HashAndSalt() (err error) {
@@ -58,11 +58,11 @@ func (u *User) HashAndSalt() (err error) {
 }
 
 type Address struct {
-	Address  string `bson:"address" form:"address"`
-	Address2 string `bson:"address2,omitempty" form:"address2"`
-	City     string `bson:"city" form:"city"`
-	State    string `bson:"state,omitempty" form:"state"`
-	ZipCode  string `bson:"zipcode" form:"zipcode"`
+	Address  string `bson:"address" form:"address" sql:"address,text"`
+	Address2 string `bson:"address2,omitempty" form:"address2" sql:"address2,text"`
+	City     string `bson:"city" form:"city" sql:"city,text"`
+	State    string `bson:"state,omitempty" form:"state" sql:"state,text"`
+	ZipCode  string `bson:"zipcode" form:"zipcode" sql:"zipcode,text"`
 }
 
 func (a Address) String() string {

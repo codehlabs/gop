@@ -1,46 +1,10 @@
 package gop
 
 import (
-	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"testing"
 )
-
-type UseDb struct {
-}
-
-func (udb UseDb) Save(u User) error {
-	ctx := context.Background()
-	client, e := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("mdb")))
-	if e != nil {
-		return e
-	}
-	defer client.Disconnect(ctx)
-
-	col := client.Database("d").Collection("user")
-
-	_, e = col.InsertOne(ctx, u)
-	if e != nil {
-		return e
-	}
-
-	return nil
-}
-
-func (ubd UseDb) Delete(id string) error {
-	return nil
-}
-
-func (udb UseDb) Update(u User) error {
-	return nil
-}
-
-func (udb UseDb) Read(id string) (User, error) {
-	return User{}, nil
-}
 
 func TestMDBDriver(t *testing.T) {
 	mdbd, err := NewMongoADriver(os.Getenv("mdb"), "d", "user")
@@ -55,6 +19,11 @@ func TestMDBDriver(t *testing.T) {
 }
 
 func TestAddingUser(t *testing.T) {
+	mad, err := NewMongoADriver(os.Getenv("mdb"), "d", "user")
+	if err != nil {
+		t.Error(err)
+	}
+
 	u := User{}
 	u.Username = "cgrichard"
 	u.Password = "shaula"
@@ -63,9 +32,8 @@ func TestAddingUser(t *testing.T) {
 	if e != nil {
 		t.Error(e)
 	}
-	dbi := UseDb{}
 
-	e = u.Save(dbi)
+	e = u.Save(mad)
 	if e != nil {
 		t.Error(e)
 	}
