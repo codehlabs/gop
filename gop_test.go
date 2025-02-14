@@ -37,4 +37,5 @@ func TestAddingUser(t *testing.T) {
 	if e != nil {
 		t.Error(e)
 	}
+
 }
