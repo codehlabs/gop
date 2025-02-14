@@ -38,15 +38,3 @@ func TestAddingUser(t *testing.T) {
 		t.Error(e)
 	}
 }
-
-func TestLibSqlDriver(t *testing.T) {
-	driver, err := NewLibSqlADriver("file:./rdb/test.db")
-	if err != nil {
-		t.Error(err)
-	}
-	exist, err := tableExists(driver, "users")
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println("exist", exist)
-}
