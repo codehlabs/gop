@@ -1,8 +1,9 @@
-package gop
+package driver
 
 import (
 	"context"
 	"errors"
+	"github.com/racg0092/gop"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -36,29 +37,29 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	defer md.client.Disconnect(ctx)
 
 	msr := md.collection.FindOne(ctx, filter, options.FindOne().SetProjection(bson.D{}))
-	var u User
+	var u gop.User
 
 	err = msr.Decode(&u)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return "", ErrUnabelToAuthenticate
+			return "", gop.ErrUnabelToAuthenticate
 		}
 		return "", err
 	}
 
-	hash, err := ValidateHash(u.Salt, password)
+	hash, err := gop.ValidateHash(u.Salt, password)
 	if err != nil {
 		return "", err
 	}
 
 	if hash != u.Password {
-		return "", ErrUnabelToAuthenticate
+		return "", gop.ErrUnabelToAuthenticate
 	}
 
 	return u.Id, nil
 }
 
-func (md MongoADriver) Save(u User) error {
+func (md MongoADriver) Save(u gop.User) error {
 
 	matching := []bson.M{}
 
@@ -98,7 +99,7 @@ func (md MongoADriver) Save(u User) error {
 	return nil
 }
 
-func (md MongoADriver) Update(u User) error {
+func (md MongoADriver) Update(u gop.User) error {
 	return nil
 }
 
@@ -106,8 +107,8 @@ func (md MongoADriver) Delete(id string) error {
 	return nil
 }
 
-func (md MongoADriver) Read(id string) (User, error) {
-	return User{}, nil
+func (md MongoADriver) Read(id string) (gop.User, error) {
+	return gop.User{}, nil
 }
 
 func NewMongoADriver(conn string, databaseName string, collection string) (MongoADriver, error) {

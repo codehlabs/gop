@@ -15,12 +15,17 @@ import (
 )
 
 var (
-	ErrTypeOfModelIsNil  = errors.New("type of model is <nil/>")
-	ErrModelMustBeStruct = errors.New("model must be a struct")
+	ErrTypeOfModelIsNil   = errors.New("type of model is <nil>")
+	ErrModelMustBeStruct  = errors.New("model must be a struct")
+	ErrTableNameIsRequire = errors.New("tablename is required")
 )
 
 type ORM struct {
 	db *sql.DB
+}
+
+func (orm ORM) Close() error {
+	return orm.db.Close()
 }
 
 type RawFn func(db *sql.DB)
@@ -40,6 +45,10 @@ func (r ORM) Save(model interface{}, tablename string) error {
 
 	if t == nil {
 		return ErrTypeOfModelIsNil
+	}
+
+	if tablename == "" {
+		return ErrTableNameIsRequire
 	}
 
 	if t.Kind() != reflect.Struct {

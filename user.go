@@ -30,7 +30,7 @@ type User struct {
 	Password  string    `bson:"password" form:"password" sql:"password,text"`
 	Salt      string    `bson:"salt" sql:"salt,text"`
 	Email     string    `bson:"email" form:"email" sql:"email,text"`
-	Phone     string    `bson:"phone" form:"phone" sql:"phone,text"`
+	Phone     string    `bson:"phone,omitempty" form:"phone" sql:"phone,text"`
 	Age       int32     `bson:"age" sql:"age,integer"`
 	DOB       time.Time `bson:"dob" form:"dob" sql:"dob,integer"` // Date of Birth
 	Address   Address   `bson:"address,omitempty"`
