@@ -12,7 +12,7 @@ import (
 
 type Config struct {
 	UseBuiltInSaveLogic bool // when calling [User] to save it will use the custom built in logic
-	UniqueIDLength      int  // defines built int unique id seed length
+	UniqueIDLength      int  // defines built in unique id seed length
 }
 
 var config = &Config{UseBuiltInSaveLogic: true}
