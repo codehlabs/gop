@@ -42,6 +42,40 @@ type InitConfig struct {
 	Collection string // when using mongo action driver only
 }
 
+// Check if any of the struct fields has the default initialization value
+func (i InitConfig) IsDefault() bool {
+
+	if i.Conn == "" {
+		return true
+	}
+
+	if i.Database == "" {
+		return true
+	}
+
+	if i.TableName == "" && i.Collection == "" {
+		return true
+	}
+
+	return false
+}
+
+var config *InitConfig
+
+// Set driver configuration
+func Config(i InitConfig) (*InitConfig, error) {
+	if i.IsDefault() {
+		return nil, errors.New("all values must be set for driver configuration")
+	}
+	config = &i
+	return config, nil
+}
+
+// Driver configuration
+func GetConfig() *InitConfig {
+	return config
+}
+
 var driver_config = &DriverConfig{true, true, true}
 
 type ActionDriver interface {

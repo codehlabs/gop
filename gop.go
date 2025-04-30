@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/racg0092/gop/core"
+	"github.com/racg0092/gop/driver"
 	"io"
 	"net/http"
 	"reflect"
@@ -138,4 +139,17 @@ func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 	}
 
 	return nil
+}
+
+//TODO: i honestly think some of this trail of functions are useless and cause overhead it may be better to just include everything
+//in the main scope
+
+// Set driver configuration
+func SetDriverConfig(i driver.InitConfig) (*driver.InitConfig, error) {
+	return driver.Config(i)
+}
+
+// Get driver configuration
+func GetDriverConfig() *driver.InitConfig {
+	return driver.GetConfig()
 }

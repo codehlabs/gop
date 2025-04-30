@@ -1,7 +1,7 @@
 package driver
 
 import (
-	"github.com/racg0092/gop"
+	"github.com/racg0092/gop/core"
 	"os"
 	"testing"
 	"time"
@@ -25,7 +25,7 @@ func TestDriver(t *testing.T) {
 			t.Error(err)
 		}
 
-		u := gop.User{
+		u := core.User{
 			Username: "jdoes00",
 			FirsName: "Jon",
 			LastName: "Doe",
@@ -52,7 +52,7 @@ func TestDriver(t *testing.T) {
 			t.Error(err)
 		}
 
-		u := gop.User{
+		u := core.User{
 			Username: "jdoes00",
 			FirsName: "Jon",
 			LastName: "Doe",
@@ -102,7 +102,7 @@ func TestUtilsLibSql(t *testing.T) {
 	})
 
 	t.Run("duplicate account", func(t *testing.T) {
-		u := gop.User{
+		u := core.User{
 			Username: "jdoes00",
 			Email:    "jdoe@emai.com",
 			Phone:    "+19999999999",
@@ -115,7 +115,7 @@ func TestUtilsLibSql(t *testing.T) {
 	})
 
 	t.Run("no duplicate account", func(t *testing.T) {
-		u := gop.User{
+		u := core.User{
 			Username: "odinson",
 			Email:    "o@son.com",
 			Phone:    "+16767776655",
