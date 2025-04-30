@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/racg0092/gop"
+	"github.com/racg0092/gop/core"
 	"github.com/racg0092/gop/rdb"
 	_ "github.com/tursodatabase/go-libsql"
 )
@@ -40,7 +40,7 @@ func (d LibSqlADriver) Login(username, email, phone, password string) (id string
 	return id, err
 }
 
-func (d LibSqlADriver) Save(u gop.User) error {
+func (d LibSqlADriver) Save(u core.User) error {
 	err := createUserTable(d, "")
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (d LibSqlADriver) Save(u gop.User) error {
 	return nil
 }
 
-func (d LibSqlADriver) Update(u gop.User) error {
+func (d LibSqlADriver) Update(u core.User) error {
 	return nil
 }
 
@@ -64,8 +64,8 @@ func (d LibSqlADriver) Delete(id string) error {
 	return nil
 }
 
-func (d LibSqlADriver) Read(id string) (gop.User, error) {
-	return gop.User{}, nil
+func (d LibSqlADriver) Read(id string) (core.User, error) {
+	return core.User{}, nil
 }
 
 // Check is table exists in the database
@@ -98,7 +98,7 @@ func tableExists(driver ActionDriver, table string) (bool, error) {
 
 // Creates user table
 func createUserTable(driver LibSqlADriver, tablename string) error {
-	u := gop.User{}
+	u := core.User{}
 	err := driver.orm.CreateTable(u, tablename)
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func createUserTable(driver LibSqlADriver, tablename string) error {
 }
 
 // Checks if there are any duplicates in the database
-func checkIfDup(driver ActionDriver, config *DriverConfig, u gop.User) error {
+func checkIfDup(driver ActionDriver, config *DriverConfig, u core.User) error {
 	//NOTE: may need to pass in table to make it explicit instead of implicit
 	db := driver.Db()
 

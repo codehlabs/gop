@@ -1,4 +1,4 @@
-package gop
+package core
 
 import (
 	"errors"
@@ -21,6 +21,6 @@ func (e GopError) Error() string {
 	return msg
 }
 
-func (e *GopError) append(s string) {
+func (e *GopError) Append(s string) {
 	e.appended = e.appended + s
 }
