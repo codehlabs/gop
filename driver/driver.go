@@ -3,8 +3,7 @@ package driver
 import (
 	"database/sql"
 	"errors"
-
-	"github.com/racg0092/gop"
+	"github.com/racg0092/gop/core"
 )
 
 type Type int
@@ -46,7 +45,7 @@ type InitConfig struct {
 var driver_config = &DriverConfig{true, true, true}
 
 type ActionDriver interface {
-	gop.Db
+	core.Db
 	Login(username, email, phone string, password string) (id string, err error)
 	Db() *sql.DB
 }
