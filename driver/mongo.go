@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/racg0092/gop"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +14,10 @@ type MongoADriver struct {
 	client     *mongo.Client
 	db         *mongo.Database // database to operate with
 	collection *mongo.Collection
+}
+
+func (md MongoADriver) Db() *sql.DB {
+	return nil
 }
 
 // Authenticates [User] in the system using username, email of phone

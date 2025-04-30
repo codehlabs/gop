@@ -1,7 +1,9 @@
 package driver
 
 import (
+	"database/sql"
 	"errors"
+
 	"github.com/racg0092/gop"
 )
 
@@ -33,6 +35,7 @@ type DriverConfig struct {
 	UniquePhone    bool // unique database phone defaults to true
 }
 
+// Driver confifuration
 type InitConfig struct {
 	Conn       string
 	Database   string
@@ -45,6 +48,7 @@ var driver_config = &DriverConfig{true, true, true}
 type ActionDriver interface {
 	gop.Db
 	Login(username, email, phone string, password string) (id string, err error)
+	Db() *sql.DB
 }
 
 // Sets driver configuration
@@ -69,4 +73,6 @@ func New(dt Type, config InitConfig) (ActionDriver, error) {
 
 var (
 	ErrUnknowDriver = errors.New("unknow action driver type")
+	ErrDbIsNil      = errors.New("driver sql db is <nil>")
+	ErrDupUser      = errors.New("duplicate user email, phone or username is already in the database")
 )

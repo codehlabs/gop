@@ -69,3 +69,63 @@ func TestDriver(t *testing.T) {
 	})
 
 }
+
+func TestUtilsLibSql(t *testing.T) {
+	config := InitConfig{Conn: "file:../local.db"}
+	driver, err := New(LIBSQL, config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("table not found", func(t *testing.T) {
+		exist, err := tableExists(driver, "foos")
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		if exist == true {
+			t.Errorf("expected foos to be false but got %v", exist)
+		}
+
+	})
+
+	t.Run("table found", func(t *testing.T) {
+		exist, err := tableExists(driver, "bar")
+		if err != nil {
+			t.Error(err)
+		}
+
+		if exist == false {
+			t.Errorf("expected bar to extist but got %v", exist)
+		}
+	})
+
+	t.Run("duplicate account", func(t *testing.T) {
+		u := gop.User{
+			Username: "jdoes00",
+			Email:    "jdoe@emai.com",
+			Phone:    "+19999999999",
+		}
+		err := checkIfDup(driver, &DriverConfig{true, true, true}, u)
+
+		if err != ErrDupUser {
+			t.Errorf("expected %q got %q", ErrDupUser, err)
+		}
+	})
+
+	t.Run("no duplicate account", func(t *testing.T) {
+		u := gop.User{
+			Username: "odinson",
+			Email:    "o@son.com",
+			Phone:    "+16767776655",
+		}
+
+		err := checkIfDup(driver, &DriverConfig{true, true, true}, u)
+
+		if err != nil {
+			t.Error(err)
+		}
+	})
+
+}

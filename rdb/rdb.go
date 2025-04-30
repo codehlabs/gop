@@ -327,7 +327,7 @@ func sanitize_keyword(column_name string) string {
 	return fmt.Sprintf("[%s]", column_name)
 }
 
-// Raw query
-func (orm ORM) Raw(f RawFn) {
-	f(orm.db)
+// Access the Db object of ORM
+func (orm ORM) Db() *sql.DB {
+	return orm.db
 }

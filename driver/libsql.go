@@ -2,6 +2,7 @@ package driver
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/racg0092/gop"
 	"github.com/racg0092/gop/rdb"
@@ -11,6 +12,10 @@ import (
 type LibSqlADriver struct {
 	dbpath string
 	orm    rdb.ORM
+}
+
+func (d LibSqlADriver) Db() *sql.DB {
+	return d.orm.Db()
 }
 
 // Closes the connection
@@ -64,28 +69,31 @@ func (d LibSqlADriver) Read(id string) (gop.User, error) {
 }
 
 // Check is table exists in the database
-func tableExists(driver LibSqlADriver, table string) (bool, error) {
+func tableExists(driver ActionDriver, table string) (bool, error) {
 	var name string
 	var err error
-	driver.orm.Raw(func(db *sql.DB) {
-		err = db.QueryRow(`
+	db := driver.Db()
+
+	if db == nil {
+		return false, ErrDbIsNil
+	}
+
+	err = db.QueryRow(`
       select name
       from sqlite_master
       where type='table'
       and name =?
       `, table).Scan(&name)
-		if err == sql.ErrNoRows {
-			return
-		}
-		if err != nil {
-			return
-		}
-		return
-	})
+
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
+
 	if err != nil {
 		return false, err
 	}
-	return true, err
+
+	return true, nil
 }
 
 // Creates user table
@@ -98,11 +106,49 @@ func createUserTable(driver LibSqlADriver, tablename string) error {
 	return nil
 }
 
-// Chekcs if there are any duplicates in the database
-func checkIfDup(driver LibSqlADriver, config *DriverConfig) error {
-	var err error
-	driver.orm.Raw(func(db *sql.DB) {
-		//TODO: finish business logic
-	})
-	return err
+// Checks if there are any duplicates in the database
+func checkIfDup(driver ActionDriver, config *DriverConfig, u gop.User) error {
+	//NOTE: may need to pass in table to make it explicit instead of implicit
+	db := driver.Db()
+
+	if db == nil {
+		return ErrDbIsNil
+	}
+
+	query := "select count(id) from users where"
+
+	if config.UniqueEmail {
+		query = fmt.Sprintf("%s email = '%s'", query, u.Email)
+	}
+
+	if config.UniquePhone {
+		query = fmt.Sprintf("%s OR phone = '%s'", query, u.Phone)
+	}
+
+	if config.UniqueUsername {
+		query = fmt.Sprintf("%s OR username = '%s'", query, u.Username)
+	}
+
+	result := db.QueryRow(query)
+	err := result.Err()
+
+	if err == sql.ErrNoRows {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var affected int
+	err = result.Scan(&affected)
+	if err != nil {
+		return err
+	}
+
+	if affected > 0 {
+		return ErrDupUser
+	}
+
+	return nil
 }
