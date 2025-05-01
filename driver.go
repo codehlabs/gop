@@ -1,9 +1,8 @@
-package driver
+package gop
 
 import (
 	"database/sql"
 	"errors"
-	"github.com/racg0092/gop/core"
 )
 
 type Type int
@@ -28,14 +27,14 @@ const (
 )
 
 // Configures driver behavior
-type DriverConfig struct {
+type DriverBehavior struct {
 	UniqueUsername bool // unique database username defaults to true
 	UniqueEmail    bool // unique database email defaults to true
 	UniquePhone    bool // unique database phone defaults to true
 }
 
 // Driver confifuration
-type InitConfig struct {
+type DriverConfig struct {
 	Conn       string
 	Database   string
 	TableName  string
@@ -43,7 +42,7 @@ type InitConfig struct {
 }
 
 // Check if any of the struct fields has the default initialization value
-func (i InitConfig) IsDefault() bool {
+func (i DriverConfig) IsDefault() bool {
 
 	if i.Conn == "" {
 		return true
@@ -60,38 +59,34 @@ func (i InitConfig) IsDefault() bool {
 	return false
 }
 
-var config *InitConfig
+var driver_config *DriverConfig
 
 // Set driver configuration
-func Config(i InitConfig) (*InitConfig, error) {
+func SetDriverConfig(i DriverConfig) (*DriverConfig, error) {
 	if i.IsDefault() {
 		return nil, errors.New("all values must be set for driver configuration")
 	}
-	config = &i
-	return config, nil
+	driver_config = &i
+	return driver_config, nil
 }
 
 // Driver configuration
-func GetConfig() *InitConfig {
-	return config
+func GetDriverConfig() *DriverConfig {
+	return driver_config
 }
 
-var driver_config = &DriverConfig{true, true, true}
+var driverbehavior = &DriverBehavior{true, true, true}
 
 type ActionDriver interface {
-	core.Db
+	Db
 	Login(username, email, phone string, password string) (id string, err error)
 	Db() *sql.DB
 }
 
-// Sets driver configuration
-func SetDriverConfig(c DriverConfig) {
-	driver_config = &c
-}
+var driver ActionDriver
 
 // Returns new driver based on dt and configuration
-func New(dt Type, config InitConfig) (ActionDriver, error) {
-	var driver ActionDriver
+func NewDriver(dt Type, config DriverConfig) (ActionDriver, error) {
 	var err error
 	switch dt {
 	case MONGO:
@@ -102,6 +97,14 @@ func New(dt Type, config InitConfig) (ActionDriver, error) {
 		err = ErrUnknowDriver
 	}
 	return driver, err
+}
+
+// Get driver
+func GetDriver() ActionDriver {
+	if driver == nil {
+		panic("driver is not set")
+	}
+	return driver
 }
 
 var (

@@ -10,14 +10,27 @@ Sample of usage
 import (
 	"net/http"
 	"github.com/racg0092/gop"
-	"github.com/racg0092/gop/driver"
 )
 
 
 func main() {
+
+  gop.SetDriverConfig(DriverConfig{
+    Conn: os.Getenv("db"),
+    Database: "db",
+    Collection: "users",
+  )
+
+  // using mongo db as the driver to save data in this case
+  _, e := NewDriver(driver.MONGO, GetDriverConfig())
+  if e != nil {
+    panic(e)
+  }
+
   mux := http.NewServerMux()
   //  Sign up or sign Path
   mux.HandleFunc("POST /auth", signup)
+
   server := http.Server{Addr: "127.0.0.1:8080", Handler: mux}
   if e := server.ListenAndServer(); e != nil {
     panic(e)
@@ -40,29 +53,13 @@ func signup(w http.ResponseWriter, r *http.Request) {
   }
 
   // logic configuration. this is optional there are built in defaults
-	gop.SetConfig(
-    gop.Config{
+	gop.SetConfig(gop.Config{
       UniqueIDLength: 32,
       UseBuiltInSaveLogic: true
-    }
-  )
-
-  // driver configuration required for saving to database
-	config := driver.InitConfig{
-    Conn: os.Getenv("db"),
-    Database: "lobos",
-    Collection: "users"
-  }
-
-  // using mongo db as the driver to save data in this case
-  drv, e := driver.New(driver.MONGO, config)
-  if e != nil {
-    //Handle error
-  }
-
+  })
 
   // Saved data to the database
-  if e := user.Save(drv); e != nil {
+  if e := user.Save(GetDriver()); e != nil {
     // Handle error
   }
 

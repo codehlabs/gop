@@ -2,5 +2,4 @@
 
 .envrc
 
-
-commit_message.txt
+local.db

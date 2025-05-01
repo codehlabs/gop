@@ -1,4 +1,4 @@
-package driver
+package gop
 
 func LoginViaEmail(email, password string, d ActionDriver) (string, error) {
 	return d.Login("", email, "", password)

@@ -1,10 +1,9 @@
-package driver
+package gop
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/racg0092/gop/core"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -42,41 +41,41 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	defer md.client.Disconnect(ctx)
 
 	msr := md.collection.FindOne(ctx, filter, options.FindOne().SetProjection(bson.D{}))
-	var u core.User
+	var u User
 
 	err = msr.Decode(&u)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return "", core.ErrUnabelToAuthenticate
+			return "", ErrUnabelToAuthenticate
 		}
 		return "", err
 	}
 
-	hash, err := core.ValidateHash(u.Salt, password)
+	hash, err := ValidateHash(u.Salt, password)
 	if err != nil {
 		return "", err
 	}
 
 	if hash != u.Password {
-		return "", core.ErrUnabelToAuthenticate
+		return "", ErrUnabelToAuthenticate
 	}
 
 	return u.Id, nil
 }
 
-func (md MongoADriver) Save(u core.User) error {
+func (md MongoADriver) Save(u User) error {
 
 	matching := []bson.M{}
 
-	if driver_config.UniqueEmail {
+	if driverbehavior.UniqueEmail {
 		matching = append(matching, bson.M{"email": u.Email})
 	}
 
-	if driver_config.UniquePhone {
+	if driverbehavior.UniquePhone {
 		matching = append(matching, bson.M{"phone": u.Phone})
 	}
 
-	if driver_config.UniqueUsername {
+	if driverbehavior.UniqueUsername {
 		matching = append(matching, bson.M{"username": u.Username})
 	}
 
@@ -104,7 +103,7 @@ func (md MongoADriver) Save(u core.User) error {
 	return nil
 }
 
-func (md MongoADriver) Update(u core.User) error {
+func (md MongoADriver) Update(u User) error {
 	return nil
 }
 
@@ -112,17 +111,17 @@ func (md MongoADriver) Delete(id string) error {
 	return nil
 }
 
-func (md MongoADriver) Read(id string) (core.User, error) {
-	return core.User{}, nil
+func (md MongoADriver) Read(id string) (User, error) {
+	return User{}, nil
 }
 
-func NewMongoADriver(conn string, databaseName string, collection string) (MongoADriver, error) {
+func NewMongoADriver(conn string, databaseName string, collection string) (*MongoADriver, error) {
 	ctx := context.Background()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conn))
 	if err != nil {
-		return MongoADriver{}, err
+		return nil, err
 	}
-	d := MongoADriver{}
+	d := &MongoADriver{}
 	d.client = client
 	d.db = d.client.Database(databaseName)
 	d.collection = d.db.Collection(collection)

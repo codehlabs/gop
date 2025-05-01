@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"fmt"
-	"github.com/racg0092/gop/core"
-	"github.com/racg0092/gop/driver"
 	"io"
 	"net/http"
 	"reflect"
@@ -13,11 +11,6 @@ import (
 	"strings"
 	"time"
 )
-
-// Set Custom configuration
-func SetConfig(c core.Config) {
-	core.SetConfig(c)
-}
 
 // Bind form data to data
 func bind_form_data(r *http.Request, data interface{}) error {
@@ -79,8 +72,8 @@ func bind_form_data(r *http.Request, data interface{}) error {
 }
 
 // Creates an user struct from the form data
-func UserFromForm(r *http.Request) (core.User, error) {
-	u := core.User{}
+func UserFromForm(r *http.Request) (User, error) {
+	u := User{}
 	err := r.ParseForm()
 	if err != nil {
 		return u, err
@@ -99,7 +92,7 @@ func UserFromForm(r *http.Request) (core.User, error) {
 // against 1 million commonly used bad passwords
 func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 	if len(password) < 20 {
-		return core.ErrShortPassword
+		return ErrShortPassword
 	}
 
 	if checkifpwned {
@@ -127,10 +120,10 @@ func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 			breaches, err := strconv.Atoi(string(data))
 			if err == nil {
 				if breaches > 500 {
-					core.ErrPwnedPassword.Append("highly insecure password it has been breached " + string(data))
+					ErrPwnedPassword.Append("highly insecure password it has been breached " + string(data))
 				}
 			}
-			return core.ErrPwnedPassword
+			return ErrPwnedPassword
 		}
 	}
 
@@ -139,17 +132,4 @@ func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 	}
 
 	return nil
-}
-
-//TODO: i honestly think some of this trail of functions are useless and cause overhead it may be better to just include everything
-//in the main scope
-
-// Set driver configuration
-func SetDriverConfig(i driver.InitConfig) (*driver.InitConfig, error) {
-	return driver.Config(i)
-}
-
-// Get driver configuration
-func GetDriverConfig() *driver.InitConfig {
-	return driver.GetConfig()
 }

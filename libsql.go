@@ -1,10 +1,8 @@
-package driver
+package gop
 
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/racg0092/gop/core"
 	"github.com/racg0092/gop/rdb"
 	_ "github.com/tursodatabase/go-libsql"
 )
@@ -25,11 +23,11 @@ func (d LibSqlADriver) Close() error {
 
 // Creates a new LibSql Driver where dbpath is the database and usertable is the table
 // to save the users to
-func NewLibSqlADriver(dbpath string) (LibSqlADriver, error) {
-	driver := LibSqlADriver{dbpath: dbpath}
+func NewLibSqlADriver(dbpath string) (*LibSqlADriver, error) {
+	driver := &LibSqlADriver{dbpath: dbpath}
 	orm, err := rdb.Open("libsql", dbpath)
 	if err != nil {
-		return driver, err
+		return nil, err
 	}
 	driver.orm = orm
 	return driver, nil
@@ -40,7 +38,7 @@ func (d LibSqlADriver) Login(username, email, phone, password string) (id string
 	return id, err
 }
 
-func (d LibSqlADriver) Save(u core.User) error {
+func (d LibSqlADriver) Save(u User) error {
 	err := createUserTable(d, "")
 	if err != nil {
 		return err
@@ -56,7 +54,7 @@ func (d LibSqlADriver) Save(u core.User) error {
 	return nil
 }
 
-func (d LibSqlADriver) Update(u core.User) error {
+func (d LibSqlADriver) Update(u User) error {
 	return nil
 }
 
@@ -64,8 +62,8 @@ func (d LibSqlADriver) Delete(id string) error {
 	return nil
 }
 
-func (d LibSqlADriver) Read(id string) (core.User, error) {
-	return core.User{}, nil
+func (d LibSqlADriver) Read(id string) (User, error) {
+	return User{}, nil
 }
 
 // Check is table exists in the database
@@ -98,7 +96,7 @@ func tableExists(driver ActionDriver, table string) (bool, error) {
 
 // Creates user table
 func createUserTable(driver LibSqlADriver, tablename string) error {
-	u := core.User{}
+	u := User{}
 	err := driver.orm.CreateTable(u, tablename)
 	if err != nil {
 		return err
@@ -107,7 +105,7 @@ func createUserTable(driver LibSqlADriver, tablename string) error {
 }
 
 // Checks if there are any duplicates in the database
-func checkIfDup(driver ActionDriver, config *DriverConfig, u core.User) error {
+func checkIfDup(driver ActionDriver, config *DriverBehavior, u User) error {
 	//NOTE: may need to pass in table to make it explicit instead of implicit
 	db := driver.Db()
 
