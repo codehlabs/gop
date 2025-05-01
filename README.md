@@ -4,7 +4,7 @@ Generic user sign up and implemetation for User/Profile bases applications. Take
 
 
 ## QUICK START
-Sample of usage
+Quick usage example
 
 ```go
 import (
@@ -52,11 +52,6 @@ func signup(w http.ResponseWriter, r *http.Request) {
     // Handle error
   }
 
-  // logic configuration. this is optional there are built in defaults
-	gop.SetConfig(gop.Config{
-      UniqueIDLength: 32,
-      UseBuiltInSaveLogic: true
-  })
 
   // Saved data to the database
   if e := user.Save(GetDriver()); e != nil {
