@@ -1,11 +1,9 @@
 package gop
 
 import (
-	"testing"
-
-	"github.com/racg0092/gop/core"
 	"github.com/racg0092/gop/rdb"
 	_ "github.com/tursodatabase/go-libsql"
+	"testing"
 )
 
 func TestSqlUser(t *testing.T) {
@@ -14,7 +12,7 @@ func TestSqlUser(t *testing.T) {
 		t.Error(err)
 	}
 
-	u := core.User{}
+	u := User{}
 
 	err = orm.CreateTable(u, "")
 	if err != nil {

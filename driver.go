@@ -1,9 +1,8 @@
-package driver
+package gop
 
 import (
 	"database/sql"
 	"errors"
-	"github.com/racg0092/gop/core"
 )
 
 type Type int
@@ -28,36 +27,66 @@ const (
 )
 
 // Configures driver behavior
-type DriverConfig struct {
+type DriverBehavior struct {
 	UniqueUsername bool // unique database username defaults to true
 	UniqueEmail    bool // unique database email defaults to true
 	UniquePhone    bool // unique database phone defaults to true
 }
 
 // Driver confifuration
-type InitConfig struct {
+type DriverConfig struct {
 	Conn       string
 	Database   string
 	TableName  string
 	Collection string // when using mongo action driver only
 }
 
-var driver_config = &DriverConfig{true, true, true}
+// Check if any of the struct fields has the default initialization value
+func (i DriverConfig) IsDefault() bool {
+
+	if i.Conn == "" {
+		return true
+	}
+
+	if i.Database == "" {
+		return true
+	}
+
+	if i.TableName == "" && i.Collection == "" {
+		return true
+	}
+
+	return false
+}
+
+var driver_config *DriverConfig
+
+// Set driver configuration
+func SetDriverConfig(i DriverConfig) (*DriverConfig, error) {
+	if i.IsDefault() {
+		return nil, errors.New("all values must be set for driver configuration")
+	}
+	driver_config = &i
+	return driver_config, nil
+}
+
+// Driver configuration
+func GetDriverConfig() *DriverConfig {
+	return driver_config
+}
+
+var driverbehavior = &DriverBehavior{true, true, true}
 
 type ActionDriver interface {
-	core.Db
+	Db
 	Login(username, email, phone string, password string) (id string, err error)
 	Db() *sql.DB
 }
 
-// Sets driver configuration
-func SetDriverConfig(c DriverConfig) {
-	driver_config = &c
-}
+var driver ActionDriver
 
 // Returns new driver based on dt and configuration
-func New(dt Type, config InitConfig) (ActionDriver, error) {
-	var driver ActionDriver
+func NewDriver(dt Type, config DriverConfig) (ActionDriver, error) {
 	var err error
 	switch dt {
 	case MONGO:
@@ -68,6 +97,14 @@ func New(dt Type, config InitConfig) (ActionDriver, error) {
 		err = ErrUnknowDriver
 	}
 	return driver, err
+}
+
+// Get driver
+func GetDriver() ActionDriver {
+	if driver == nil {
+		panic("driver is not set")
+	}
+	return driver
 }
 
 var (

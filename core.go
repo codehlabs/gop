@@ -1,4 +1,4 @@
-package core
+package gop
 
 import (
 	"crypto/rand"
@@ -22,7 +22,7 @@ type Config struct {
 	UniqueIDLength      int  // defines built in unique id seed length
 }
 
-var config = &Config{UseBuiltInSaveLogic: true}
+var config = &Config{UseBuiltInSaveLogic: true, UniqueIDLength: 32}
 
 func SetConfig(c Config) {
 	config = &c

@@ -1,7 +1,6 @@
-package driver
+package gop
 
 import (
-	"github.com/racg0092/gop"
 	"os"
 	"testing"
 	"time"
@@ -10,7 +9,7 @@ import (
 func TestDriver(t *testing.T) {
 
 	t.Run("mongo_driver", func(t *testing.T) {
-		d, err := New(MONGO, InitConfig{
+		d, err := NewDriver(MONGO, DriverConfig{
 			Conn:       os.Getenv("mdb"),
 			Database:   "d",
 			Collection: "user",
@@ -25,7 +24,7 @@ func TestDriver(t *testing.T) {
 			t.Error(err)
 		}
 
-		u := gop.User{
+		u := User{
 			Username: "jdoes00",
 			FirsName: "Jon",
 			LastName: "Doe",
@@ -42,7 +41,7 @@ func TestDriver(t *testing.T) {
 	})
 
 	t.Run("libsql_driver", func(t *testing.T) {
-		d, err := New(LIBSQL, InitConfig{Conn: "file:../local.db"})
+		d, err := NewDriver(LIBSQL, DriverConfig{Conn: "file:local.db"})
 		if err != nil {
 			t.Error(err)
 		}
@@ -52,7 +51,7 @@ func TestDriver(t *testing.T) {
 			t.Error(err)
 		}
 
-		u := gop.User{
+		u := User{
 			Username: "jdoes00",
 			FirsName: "Jon",
 			LastName: "Doe",
@@ -71,8 +70,8 @@ func TestDriver(t *testing.T) {
 }
 
 func TestUtilsLibSql(t *testing.T) {
-	config := InitConfig{Conn: "file:../local.db"}
-	driver, err := New(LIBSQL, config)
+	config := DriverConfig{Conn: "file:local.db"}
+	driver, err := NewDriver(LIBSQL, config)
 	if err != nil {
 		t.Error(err)
 	}
@@ -102,12 +101,12 @@ func TestUtilsLibSql(t *testing.T) {
 	})
 
 	t.Run("duplicate account", func(t *testing.T) {
-		u := gop.User{
+		u := User{
 			Username: "jdoes00",
 			Email:    "jdoe@emai.com",
 			Phone:    "+19999999999",
 		}
-		err := checkIfDup(driver, &DriverConfig{true, true, true}, u)
+		err := checkIfDup(driver, &DriverBehavior{true, true, true}, u)
 
 		if err != ErrDupUser {
 			t.Errorf("expected %q got %q", ErrDupUser, err)
@@ -115,13 +114,13 @@ func TestUtilsLibSql(t *testing.T) {
 	})
 
 	t.Run("no duplicate account", func(t *testing.T) {
-		u := gop.User{
+		u := User{
 			Username: "odinson",
 			Email:    "o@son.com",
 			Phone:    "+16767776655",
 		}
 
-		err := checkIfDup(driver, &DriverConfig{true, true, true}, u)
+		err := checkIfDup(driver, &DriverBehavior{true, true, true}, u)
 
 		if err != nil {
 			t.Error(err)
