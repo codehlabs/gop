@@ -8,6 +8,7 @@ var (
 	ErrUnabelToAuthenticate = errors.New("unable to authenticate password or username does not match")
 	ErrShortPassword        = errors.New("password is less than 16 characters long. it needs to be longer")
 	ErrPwnedPassword        = GopError{message: "this password has been exposed previously on a data breach"}
+	ErrPasswordRequired     = errors.New("password is required")
 )
 
 type GopError struct {

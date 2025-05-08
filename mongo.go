@@ -13,6 +13,19 @@ type MongoADriver struct {
 	client     *mongo.Client
 	db         *mongo.Database // database to operate with
 	collection *mongo.Collection
+	connstr    string
+}
+
+func (md *MongoADriver) connect() error {
+	if md.connstr == "" {
+		return errors.New("connetion string is not set")
+	}
+	c, err := mongo.Connect(context.Background(), options.Client().ApplyURI(md.connstr))
+	if err != nil {
+		return err
+	}
+	md.client = c
+	return nil
 }
 
 func (md MongoADriver) Db() *sql.DB {
@@ -21,6 +34,7 @@ func (md MongoADriver) Db() *sql.DB {
 
 // Authenticates [User] in the system using username, email of phone
 func (md MongoADriver) Login(username, email, phone string, password string) (id string, err error) {
+
 	filter := bson.D{}
 	projection := bson.D{}
 
@@ -116,15 +130,12 @@ func (md MongoADriver) Read(id string) (User, error) {
 }
 
 func NewMongoADriver(conn string, databaseName string, collection string) (*MongoADriver, error) {
-	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conn))
-	if err != nil {
-		return nil, err
+	d := &MongoADriver{connstr: conn}
+	e := d.connect()
+	if e != nil {
+		return nil, e
 	}
-	d := &MongoADriver{}
-	d.client = client
 	d.db = d.client.Database(databaseName)
 	d.collection = d.db.Collection(collection)
-
 	return d, nil
 }
