@@ -14,6 +14,7 @@ type User struct {
 	FirsName  string    `bson:"firstname" form:"firstname" sql:"firstname,text"`
 	LastName  string    `bson:"lastname" form:"lastname" sql:"lastname,text"`
 	Password  string    `bson:"password" form:"password" sql:"password,text"`
+	Password2 string    `bson:"omit" form:"password2" sql:"omit"`
 	Salt      string    `bson:"salt" sql:"salt,text"`
 	Email     string    `bson:"email" form:"email" sql:"email,text"`
 	Phone     string    `bson:"phone,omitempty" form:"phone" sql:"phone,text"`
