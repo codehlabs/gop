@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Default user implementation
 type User struct {
 	Id        string    `bson:"_id" sql:"id,text,unique"`
 	Username  string    `bson:"username" form:"username" sql:"username,text"`
@@ -42,23 +43,37 @@ func (u *User) HashAndSalt() (err error) {
 	return nil
 }
 
+// Saves to database
 func (u User) Save(db Db) error {
 
 	if config.UseBuiltInSaveLogic {
+
+		if u.Password == "" {
+			return ErrPasswordRequired
+		}
+
 		if err := u.HashAndSalt(); err != nil {
 			return err
 		}
+
+		var age time.Duration
+		if !u.DOB.IsZero() {
+			age = time.Now().Sub(u.DOB)
+			u.Age = int32(age.Hours() / 24 / 365)
+		}
+
 		u.CreatedAt = time.Now()
-		age := time.Now().Sub(u.DOB)
-		u.Age = int32(age.Hours() / 24 / 365)
 		seed_length := config.UniqueIDLength
+
 		if seed_length == 0 {
 			seed_length = 16
 		}
+
 		uid, err := unique_id(seed_length)
 		if err != nil {
 			return err
 		}
+
 		u.Id = uid
 	}
 
