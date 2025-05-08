@@ -34,6 +34,9 @@ func (md MongoADriver) Db() *sql.DB {
 
 // Authenticates [User] in the system using username, email of phone
 func (md MongoADriver) Login(username, email, phone string, password string) (id string, err error) {
+	if e := md.connect(); e != nil {
+		return "", e
+	}
 
 	filter := bson.D{}
 	projection := bson.D{}
@@ -78,6 +81,10 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 }
 
 func (md MongoADriver) Save(u User) error {
+	if e := md.connect(); e != nil {
+		return e
+	}
+	defer md.client.Disconnect(context.Background())
 
 	matching := []bson.M{}
 
