@@ -128,7 +128,7 @@ func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 	}
 
 	if checkifbad {
-
+		//TODO: check for bad password even if not pawned
 	}
 
 	return nil

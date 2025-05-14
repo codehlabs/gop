@@ -5,6 +5,16 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"time"
+
+	"golang.org/x/crypto/argon2"
+)
+
+const (
+	Memory      = 64 * 1024
+	Iterations  = 3
+	Parallelism = 2
+	SaltLength  = 16
+	KeyLength   = 32
 )
 
 type AccountStatus int
@@ -24,8 +34,7 @@ type User struct {
 	LastName        string    `bson:"lastname" form:"lastname" sql:"lastname,text"`
 	Password        string    `bson:"password" form:"password" sql:"password,text"`
 	Password2       string    `bson:"omit" form:"password2" sql:"omit"`
-	PasswordVersion string    `bson:"password_version" sql:"password_version,text"` // Hashing algorithm used and version
-	Salt            string    `bson:"salt" sql:"salt,text"`
+	PasswordVersion int       `bson:"password_version" sql:"password_version,int"` // Hashing algorithm used and version
 	Email           string    `bson:"email" form:"email" sql:"email,text"`
 	Phone           string    `bson:"phone,omitempty" form:"phone" sql:"phone,text"`
 	Age             int32     `bson:"age" sql:"age,integer"`
@@ -65,8 +74,25 @@ func (u *User) HashAndSalt() (err error) {
 	bytes = append(bytes, []byte(u.Password)...)
 	sha.Write(bytes)
 	hash := fmt.Sprintf("%x", sha.Sum(nil))
-	u.Password = hash
-	u.Salt = salt
+	u.Password = fmt.Sprintf("sha256$%s$%s", salt, hash)
+	return nil
+}
+
+func (u *User) ArgonHash() (err error) {
+	salt := make([]byte, SaltLength)
+	_, err = rand.Read(salt)
+	if err != nil {
+		return err
+	}
+
+	hash := argon2.Key([]byte(u.Password), salt, Iterations, Memory, Parallelism, KeyLength)
+
+	encodedSalt := fmt.Sprintf("%x", salt)
+	encodedHash := fmt.Sprintf("%x", hash)
+
+	u.PasswordVersion = argon2.Version
+
+	u.Password = fmt.Sprintf("argon2i$%d$%d$%d$%s$%s", Iterations, Memory, Parallelism, encodedSalt, encodedHash)
 	return nil
 }
 
@@ -81,8 +107,14 @@ func (u User) Save(db Db) error {
 			return ErrPasswordRequired
 		}
 
-		if err := u.HashAndSalt(); err != nil {
-			return err
+		if config.HashAlgo == SHA256 {
+			if err := u.HashAndSalt(); err != nil {
+				return err
+			}
+		} else {
+			if err := u.ArgonHash(); err != nil {
+				return err
+			}
 		}
 
 		var age time.Duration

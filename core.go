@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+type HAlgo int
+
+const (
+	SHA256 HAlgo = iota + 1
+	ARGON2
+)
+
 type Db interface {
 	Save(u User) error
 	Update(u User) error
@@ -18,11 +25,24 @@ type Db interface {
 }
 
 type Config struct {
-	UseBuiltInSaveLogic bool // when calling [User] to save it will use the custom built in logic
-	UniqueIDLength      int  // defines built in unique id seed length
+	UseBuiltInSaveLogic bool  // when calling [User] to save it will use the custom built in logic
+	UniqueIDLength      int   // defines built in unique id seed length
+	HashAlgo            HAlgo // Hashing algorithm used defaults to SHA256
+	SaltAndPepper       bool  // Defines if you want to salt and pepper the paswword
 }
 
-var config = &Config{UseBuiltInSaveLogic: true, UniqueIDLength: 32}
+var config = &Config{UseBuiltInSaveLogic: true, UniqueIDLength: 32, HashAlgo: SHA256}
+
+// Sets configuration to max security
+func SetConfigMaxSec() *Config {
+	config = &Config{
+		UseBuiltInSaveLogic: true,
+		UniqueIDLength:      32,
+		HashAlgo:            ARGON2,
+		SaltAndPepper:       true,
+	}
+	return config
+}
 
 func SetConfig(c Config) {
 	config = &c
@@ -47,6 +67,7 @@ func unique_id(length int) (string, error) {
 
 // Takes salt and password and returns a hash
 func ValidateHash(salt, password string) (string, error) {
+	//TODO: need to change this to adhere to the new hashing schema
 	bslice, err := hex.DecodeString(salt)
 	if err != nil {
 		return "", err
