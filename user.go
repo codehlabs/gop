@@ -5,8 +5,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"time"
-
-	"golang.org/x/crypto/argon2"
 )
 
 const (
@@ -78,25 +76,15 @@ func (u *User) HashAndSalt() (err error) {
 	return nil
 }
 
-func (u *User) ArgonHash() (err error) {
-	salt := make([]byte, SaltLength)
-	_, err = rand.Read(salt)
-	if err != nil {
-		return err
+func (u *User) ArgonHash() (e error) {
+	hash, version, e := argon2i_hash(u.Password, nil)
+	if e != nil {
+		return e
 	}
-
-	hash := argon2.Key([]byte(u.Password), salt, Iterations, Memory, Parallelism, KeyLength)
-
-	encodedSalt := fmt.Sprintf("%x", salt)
-	encodedHash := fmt.Sprintf("%x", hash)
-
-	u.PasswordVersion = argon2.Version
-
-	u.Password = fmt.Sprintf("argon2i$%d$%d$%d$%s$%s", Iterations, Memory, Parallelism, encodedSalt, encodedHash)
+	u.Password = hash
+	u.PasswordVersion = version
 	return nil
 }
-
-//TODO: Implemente Argon2 hashing
 
 // Saves to database
 func (u User) Save(db Db) error {
@@ -136,6 +124,11 @@ func (u User) Save(db Db) error {
 		}
 
 		u.Id = uid
+
+		if u.Username == "" && config.UseEmailIfUsernameBlank {
+			u.Username = u.Email
+		}
+
 	}
 
 	return db.Save(u)

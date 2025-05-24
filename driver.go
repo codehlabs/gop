@@ -3,6 +3,8 @@ package gop
 import (
 	"database/sql"
 	"errors"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Type int
@@ -81,6 +83,7 @@ type ActionDriver interface {
 	Db
 	Login(username, email, phone string, password string) (id string, err error)
 	Db() *sql.DB
+	MongoDb() *mongo.Database
 }
 
 var driver ActionDriver

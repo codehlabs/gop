@@ -3,8 +3,10 @@ package gop
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/racg0092/gop/rdb"
 	_ "github.com/tursodatabase/go-libsql"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type LibSqlADriver struct {
@@ -14,6 +16,10 @@ type LibSqlADriver struct {
 
 func (d LibSqlADriver) Db() *sql.DB {
 	return d.orm.Db()
+}
+
+func (d LibSqlADriver) MongoDb() *mongo.Database {
+	return nil
 }
 
 // Closes the connection

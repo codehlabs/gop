@@ -6,7 +6,10 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"golang.org/x/crypto/argon2"
+	"strings"
 	"time"
 )
 
@@ -25,10 +28,17 @@ type Db interface {
 }
 
 type Config struct {
-	UseBuiltInSaveLogic bool  // when calling [User] to save it will use the custom built in logic
-	UniqueIDLength      int   // defines built in unique id seed length
-	HashAlgo            HAlgo // Hashing algorithm used defaults to SHA256
-	SaltAndPepper       bool  // Defines if you want to salt and pepper the paswword
+	UseBuiltInSaveLogic     bool  // when calling [User] to save it will use the custom built in logic
+	UniqueIDLength          int   // defines built in unique id seed length
+	HashAlgo                HAlgo // Hashing algorithm used defaults to SHA256
+	SaltAndPepper           bool  // Defines if you want to salt and pepper the paswword
+	UseEmailIfUsernameBlank bool  // Defines if you want to use an email as an username if none set
+}
+
+// Sets email as username if username is blank
+func (c *Config) IfUserNameBlankUseEmail() *Config {
+	c.UseEmailIfUsernameBlank = true
+	return c
 }
 
 var config = &Config{UseBuiltInSaveLogic: true, UniqueIDLength: 32, HashAlgo: SHA256}
@@ -65,18 +75,70 @@ func unique_id(length int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b)[:length+8], nil
 }
 
-// Takes salt and password and returns a hash
-func ValidateHash(salt, password string) (string, error) {
-	//TODO: need to change this to adhere to the new hashing schema
-	bslice, err := hex.DecodeString(salt)
-	if err != nil {
-		return "", err
+// Takes password from user and store password and compares them
+func ValidateHash(password, storepassword string) (bool, error) {
+	parts := strings.Split(storepassword, "$")
+	algo := parts[0]
+	parts = parts[1:]
+
+	switch algo {
+	case "sha256":
+		if len(parts) < 2 {
+			return false, ErrMalformedEncodedPassword
+		}
+		salt, e := hex.DecodeString(parts[0])
+		if e != nil {
+			return false, e
+		}
+		return validate_sha256(password, storepassword, salt), nil
+	case "argon2i":
+		if len(parts) < 5 {
+			return false, ErrMalformedEncodedPassword
+		}
+		salt, e := hex.DecodeString(parts[3])
+		if e != nil {
+			return false, e
+		}
+		return validate_argon2i(password, storepassword, salt)
+	default:
+		return false, errors.New("unknow hashing algorithm")
 	}
-	bslice = append(bslice, []byte(password)...)
+}
+
+func validate_argon2i(password, storepassword string, salt []byte) (bool, error) {
+	hash, _, e := argon2i_hash(password, salt)
+	if e != nil {
+		return false, e
+	}
+	return hash == storepassword, nil
+}
+
+func validate_sha256(password, oldpassword string, salt []byte) bool {
 	sha := sha256.New()
-	_, err = sha.Write(bslice)
-	if err != nil {
-		return "", err
+	sha.Write(salt)
+	sha.Write([]byte(password))
+	hash := fmt.Sprintf("%x", sha.Sum(nil))
+	hexsalt := fmt.Sprintf("%x", salt)
+	passwordhash := fmt.Sprintf("sha256$%s$%s", hexsalt, hash)
+	return passwordhash == oldpassword
+}
+
+func argon2i_hash(password string, salt []byte) (hash string, version int, err error) {
+	if salt == nil {
+		salt = make([]byte, SaltLength)
+		_, err = rand.Read(salt)
+		if err != nil {
+			return "", -1, err
+		}
 	}
-	return fmt.Sprintf("%x", sha.Sum(nil)), nil
+
+	hashbuff := argon2.Key([]byte(password), salt, Iterations, Memory, Parallelism, KeyLength)
+
+	encodedSalt := fmt.Sprintf("%x", salt)
+	encodedHash := fmt.Sprintf("%x", hashbuff)
+
+	version = argon2.Version
+
+	hash = fmt.Sprintf("argon2i$%d$%d$%d$%s$%s", Iterations, Memory, Parallelism, encodedSalt, encodedHash)
+	return hash, version, nil
 }

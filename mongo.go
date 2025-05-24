@@ -18,7 +18,7 @@ type MongoADriver struct {
 
 func (md *MongoADriver) connect() error {
 	if md.connstr == "" {
-		return errors.New("connetion string is not set")
+		return ErrConnectionStringNil
 	}
 	c, err := mongo.Connect(context.Background(), options.Client().ApplyURI(md.connstr))
 	if err != nil {
@@ -30,6 +30,10 @@ func (md *MongoADriver) connect() error {
 
 func (md MongoADriver) Db() *sql.DB {
 	return nil
+}
+
+func (md *MongoADriver) MongoDb() *mongo.Database {
+	return md.db
 }
 
 // Authenticates [User] in the system using username, email of phone
@@ -53,7 +57,7 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	}
 
 	filter = append(filter)
-	projection = append(projection, bson.E{"password", 1}, bson.E{"salt", 1})
+	projection = append(projection, bson.E{"password", 1})
 	ctx := context.Background()
 	defer md.client.Disconnect(ctx)
 
@@ -68,12 +72,12 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 		return "", err
 	}
 
-	hash, err := ValidateHash(u.Salt, password)
+	matches, err := ValidateHash(password, u.Password)
 	if err != nil {
 		return "", err
 	}
 
-	if hash != u.Password {
+	if !matches {
 		return "", ErrUnabelToAuthenticate
 	}
 
@@ -133,6 +137,7 @@ func (md MongoADriver) Delete(id string) error {
 }
 
 func (md MongoADriver) Read(id string) (User, error) {
+	//TODO: need to finish this one
 	return User{}, nil
 }
 
