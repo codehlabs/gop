@@ -31,7 +31,7 @@ type User struct {
 	FirsName        string    `bson:"firstname" form:"firstname" sql:"firstname,text"`
 	LastName        string    `bson:"lastname" form:"lastname" sql:"lastname,text"`
 	Password        string    `bson:"password" form:"password" sql:"password,text"`
-	Password2       string    `bson:"omit" form:"password2" sql:"omit"`
+	Password2       string    `bson:"-" form:"password2" sql:"omit"`
 	PasswordVersion int       `bson:"password_version" sql:"password_version,int"` // Hashing algorithm used and version
 	Email           string    `bson:"email" form:"email" sql:"email,text"`
 	Phone           string    `bson:"phone,omitempty" form:"phone" sql:"phone,text"`
@@ -95,6 +95,19 @@ func (u User) Save(db Db) error {
 			return ErrPasswordRequired
 		}
 
+		if u.Password != u.Password2 {
+			return ErrPasswordsDoNotMatch
+		}
+
+		u.Password2 = ""
+
+		if config.IsPawnedPassword || config.IsBadPassword {
+			e := SecurePassword(u.Password, config.IsPawnedPassword, config.IsBadPassword)
+			if e != nil {
+				return e
+			}
+		}
+
 		if config.HashAlgo == SHA256 {
 			if err := u.HashAndSalt(); err != nil {
 				return err
@@ -128,7 +141,6 @@ func (u User) Save(db Db) error {
 		if u.Username == "" && config.UseEmailIfUsernameBlank {
 			u.Username = u.Email
 		}
-
 	}
 
 	return db.Save(u)

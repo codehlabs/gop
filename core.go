@@ -33,11 +33,23 @@ type Config struct {
 	HashAlgo                HAlgo // Hashing algorithm used defaults to SHA256
 	SaltAndPepper           bool  // Defines if you want to salt and pepper the paswword
 	UseEmailIfUsernameBlank bool  // Defines if you want to use an email as an username if none set
+	IsPawnedPassword        bool  // Check is password is pawned
+	IsBadPassword           bool  // Checks if passwored is bad
 }
 
 // Sets email as username if username is blank
 func (c *Config) IfUserNameBlankUseEmail() *Config {
 	c.UseEmailIfUsernameBlank = true
+	return c
+}
+
+func (c *Config) CheckIfPawnedPassword() *Config {
+	c.IsPawnedPassword = true
+	return c
+}
+
+func (c *Config) CheckIfBadPassword() *Config {
+	c.IsBadPassword = true
 	return c
 }
 
@@ -50,6 +62,8 @@ func SetConfigMaxSec() *Config {
 		UniqueIDLength:      32,
 		HashAlgo:            ARGON2,
 		SaltAndPepper:       true,
+		IsPawnedPassword:    true,
+		IsBadPassword:       true,
 	}
 	return config
 }

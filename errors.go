@@ -11,6 +11,7 @@ var (
 	ErrPasswordRequired         = errors.New("password is required")
 	ErrMalformedEncodedPassword = errors.New("malformed password format")
 	ErrConnectionStringNil      = errors.New("connetion string is <nil>")
+	ErrPasswordsDoNotMatch      = errors.New("passwords do not match")
 )
 
 type GopError struct {
