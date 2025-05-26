@@ -2,7 +2,8 @@ package gop
 
 import (
 	"github.com/racg0092/gop/rdb"
-	_ "github.com/tursodatabase/go-libsql"
+	_ "modernc.org/sqlite"
+	// _ "github.com/tursodatabase/go-libsql"
 	"os"
 	"testing"
 )

@@ -6,12 +6,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	_ "modernc.org/sqlite"
 	"reflect"
 	"slices"
 	"strings"
 	"time"
-
-	_ "github.com/tursodatabase/go-libsql"
+	// _ "github.com/tursodatabase/go-libsql"
 )
 
 var (

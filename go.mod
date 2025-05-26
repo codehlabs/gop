@@ -3,19 +3,16 @@ module github.com/racg0092/gop
 go 1.23.0
 
 require (
-	github.com/tursodatabase/go-libsql v0.0.0-20241221181756-6121e81fbf92
 	go.mongodb.org/mongo-driver v1.17.2
 	golang.org/x/crypto v0.38.0
 	modernc.org/sqlite v1.37.1
 )
 
 require (
-	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
-	github.com/libsql/sqlite-antlr4-parser v0.0.0-20240327125255-dbf53b6cbf06 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
