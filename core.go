@@ -23,8 +23,15 @@ const (
 type Db interface {
 	Save(u User) error
 	Update(u User) error
+
+	// Delete user
 	Delete(id string) error
-	Read(id string) (User, error)
+
+	// Read everything excluding only the password
+	Read(id string, includeProfile bool) (User, error)
+
+	// Read user data excluding secure data
+	ReadNonCritical(id string, includeProfile bool) (User, error)
 }
 
 type Config struct {

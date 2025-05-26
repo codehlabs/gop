@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -136,9 +138,32 @@ func (md MongoADriver) Delete(id string) error {
 	return nil
 }
 
-func (md MongoADriver) Read(id string) (User, error) {
+func (md MongoADriver) Read(id string, includeProfile bool) (User, error) {
 	//TODO: need to finish this one
 	return User{}, nil
+}
+
+func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (User, error) {
+	//TODO: finish non critical read
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+
+	projection := bson.D{
+		bson.E{"firstname", 1},
+		bson.E{"lastname", 1},
+		bson.E{"age", 1},
+		bson.E{"phone", 1},
+		bson.E{"email", 1},
+	}
+
+	doc := md.collection.FindOne(ctx, bson.D{{"_id", id}}, options.FindOne().SetProjection(projection))
+	var u User
+	e := doc.Decode(&u)
+	if e != nil {
+		return User{}, e
+	}
+
+	return u, nil
 }
 
 func NewMongoADriver(conn string, databaseName string, collection string) (*MongoADriver, error) {
