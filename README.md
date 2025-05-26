@@ -1,6 +1,6 @@
-# User/Profile
+# Generic Profile
 
-Generic user sign up and implemetation for User/Profile bases applications. Takes care of generic user CRUD using up to date security standards.
+Generic user/profile sign up and implemetation for User/Profile base applications. Takes care of generic user CRUD using up to date security standards.
 
 
 ## QUICK START

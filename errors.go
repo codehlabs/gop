@@ -5,10 +5,13 @@ import (
 )
 
 var (
-	ErrUnabelToAuthenticate = errors.New("unable to authenticate password or username does not match")
-	ErrShortPassword        = errors.New("password is less than 16 characters long. it needs to be longer")
-	ErrPwnedPassword        = GopError{message: "this password has been exposed previously on a data breach"}
-	ErrPasswordRequired     = errors.New("password is required")
+	ErrUnabelToAuthenticate     = errors.New("unable to authenticate password or username does not match")
+	ErrShortPassword            = errors.New("password is less than 16 characters long. it needs to be longer")
+	ErrPwnedPassword            = GopError{message: "this password has been exposed previously on a data breach"}
+	ErrPasswordRequired         = errors.New("password is required")
+	ErrMalformedEncodedPassword = errors.New("malformed password format")
+	ErrConnectionStringNil      = errors.New("connetion string is <nil>")
+	ErrPasswordsDoNotMatch      = errors.New("passwords do not match")
 )
 
 type GopError struct {

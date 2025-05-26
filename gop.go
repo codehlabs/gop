@@ -3,10 +3,12 @@ package gop
 import (
 	"bytes"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -128,7 +130,19 @@ func SecurePassword(password string, checkifpwned, checkifbad bool) error {
 	}
 
 	if checkifbad {
-
+		hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
+		hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
+		hasDigit := regexp.MustCompile(`\d`).MatchString(password)
+		hasSpecial := regexp.MustCompile(`[@#$%!]`).MatchString(password)
+		if !hasLower || !hasUpper || !hasDigit || !hasSpecial {
+			return errors.New(`
+Password is a bad password.
+Requirements:
+- At least one lower case letter
+- At least one upper case letter
+- At least one of the followinf special characters (@#$%!)
+       `)
+		}
 	}
 
 	return nil

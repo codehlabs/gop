@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,7 +20,7 @@ type MongoADriver struct {
 
 func (md *MongoADriver) connect() error {
 	if md.connstr == "" {
-		return errors.New("connetion string is not set")
+		return ErrConnectionStringNil
 	}
 	c, err := mongo.Connect(context.Background(), options.Client().ApplyURI(md.connstr))
 	if err != nil {
@@ -30,6 +32,10 @@ func (md *MongoADriver) connect() error {
 
 func (md MongoADriver) Db() *sql.DB {
 	return nil
+}
+
+func (md *MongoADriver) MongoDb() *mongo.Database {
+	return md.db
 }
 
 // Authenticates [User] in the system using username, email of phone
@@ -53,7 +59,7 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	}
 
 	filter = append(filter)
-	projection = append(projection, bson.E{"password", 1}, bson.E{"salt", 1})
+	projection = append(projection, bson.E{"password", 1})
 	ctx := context.Background()
 	defer md.client.Disconnect(ctx)
 
@@ -68,12 +74,12 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 		return "", err
 	}
 
-	hash, err := ValidateHash(u.Salt, password)
+	matches, err := ValidateHash(password, u.Password)
 	if err != nil {
 		return "", err
 	}
 
-	if hash != u.Password {
+	if !matches {
 		return "", ErrUnabelToAuthenticate
 	}
 
@@ -132,8 +138,32 @@ func (md MongoADriver) Delete(id string) error {
 	return nil
 }
 
-func (md MongoADriver) Read(id string) (User, error) {
+func (md MongoADriver) Read(id string, includeProfile bool) (User, error) {
+	//TODO: need to finish this one
 	return User{}, nil
+}
+
+func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (User, error) {
+	//TODO: finish non critical read
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+
+	projection := bson.D{
+		bson.E{"firstname", 1},
+		bson.E{"lastname", 1},
+		bson.E{"age", 1},
+		bson.E{"phone", 1},
+		bson.E{"email", 1},
+	}
+
+	doc := md.collection.FindOne(ctx, bson.D{{"_id", id}}, options.FindOne().SetProjection(projection))
+	var u User
+	e := doc.Decode(&u)
+	if e != nil {
+		return User{}, e
+	}
+
+	return u, nil
 }
 
 func NewMongoADriver(conn string, databaseName string, collection string) (*MongoADriver, error) {
