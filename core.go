@@ -21,7 +21,8 @@ const (
 )
 
 type Db interface {
-	Save(u User) error
+	Save(u User) (string, error)
+
 	Update(u User) error
 
 	// Delete user

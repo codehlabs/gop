@@ -34,7 +34,7 @@ func TestDriver(t *testing.T) {
 			Phone:    "+19999999999",
 		}
 
-		if err := u.Save(d); err != nil {
+		if _, err := u.Save(d); err != nil {
 			t.Error(err)
 		}
 
@@ -61,7 +61,7 @@ func TestDriver(t *testing.T) {
 			Phone:    "+19999999999",
 		}
 
-		err = u.Save(d)
+		_, err = u.Save(d)
 		if err != nil {
 			t.Error(err)
 		}

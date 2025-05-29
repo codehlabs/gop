@@ -97,16 +97,16 @@ func (u *User) ArgonHash() (e error) {
 }
 
 // Saves to database
-func (u User) Save(db Db) error {
+func (u User) Save(db Db) (string, error) {
 
 	if config.UseBuiltInSaveLogic {
 
 		if u.Password == "" {
-			return ErrPasswordRequired
+			return "", ErrPasswordRequired
 		}
 
 		if u.Password != u.Password2 {
-			return ErrPasswordsDoNotMatch
+			return "", ErrPasswordsDoNotMatch
 		}
 
 		u.Password2 = ""
@@ -114,17 +114,17 @@ func (u User) Save(db Db) error {
 		if config.IsPawnedPassword || config.IsBadPassword {
 			e := SecurePassword(u.Password, config.IsPawnedPassword, config.IsBadPassword)
 			if e != nil {
-				return e
+				return "", e
 			}
 		}
 
 		if config.HashAlgo == SHA256 {
 			if err := u.HashAndSalt(); err != nil {
-				return err
+				return "", err
 			}
 		} else {
 			if err := u.ArgonHash(); err != nil {
-				return err
+				return "", err
 			}
 		}
 
@@ -143,7 +143,7 @@ func (u User) Save(db Db) error {
 
 		uid, err := unique_id(seed_length)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		u.Id = uid

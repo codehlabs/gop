@@ -86,9 +86,10 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 	return u.Id, nil
 }
 
-func (md MongoADriver) Save(u User) error {
+func (md MongoADriver) Save(u User) (string, error) {
+	//TODO: finish logic that returns id
 	if e := md.connect(); e != nil {
-		return e
+		return "", e
 	}
 	defer md.client.Disconnect(context.Background())
 
@@ -113,21 +114,26 @@ func (md MongoADriver) Save(u User) error {
 	if len(matching) != 0 {
 		cursor, err := md.collection.Find(context.TODO(), filter)
 		if err != nil {
-			return err
+			return "", err
 		}
 		defer cursor.Close(context.TODO())
 
 		if cursor.TryNext(context.TODO()) != false {
-			return errors.New("the email, phone or username you provided already exits in the database")
+			return "", errors.New("the email, phone or username you provided already exits in the database")
 		}
 	}
 
-	_, err := md.collection.InsertOne(context.Background(), u)
+	ir, err := md.collection.InsertOne(context.Background(), u)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	id, ok := ir.InsertedID.(string)
+	if !ok {
+		return "", errors.New("wrong data type for id")
+	}
+
+	return id, nil
 }
 
 func (md MongoADriver) Update(u User) error {
