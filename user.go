@@ -24,6 +24,16 @@ const (
 	DELETED
 )
 
+// User data that excludes sensitive data
+type UserNonConfidential struct {
+	Id       string `bson:"_id" sql:"id,text,unique"`
+	FirsName string `bson:"firstname" form:"firstname" sql:"firstname,text"`
+	LastName string `bson:"lastname" form:"lastname" sql:"lastname,text"`
+	Email    string `bson:"email" form:"email" sql:"email,text"`
+	Age      int32  `bson:"age" sql:"age,integer"`
+	Phone    string `bson:"phone,omitempty" form:"phone" sql:"phone,text"`
+}
+
 // Default user implementation
 type User struct {
 	Id              string    `bson:"_id" sql:"id,text,unique"`

@@ -143,7 +143,7 @@ func (md MongoADriver) Read(id string, includeProfile bool) (User, error) {
 	return User{}, nil
 }
 
-func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (User, error) {
+func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error) {
 	//TODO: finish non critical read
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
@@ -157,10 +157,10 @@ func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (User, er
 	}
 
 	doc := md.collection.FindOne(ctx, bson.D{{"_id", id}}, options.FindOne().SetProjection(projection))
-	var u User
+	var u UserNonConfidential
 	e := doc.Decode(&u)
 	if e != nil {
-		return User{}, e
+		return UserNonConfidential{}, e
 	}
 
 	return u, nil
