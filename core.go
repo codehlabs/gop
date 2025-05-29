@@ -31,7 +31,7 @@ type Db interface {
 	Read(id string, includeProfile bool) (User, error)
 
 	// Read user data excluding secure data
-	ReadNonCritical(id string, includeProfile bool) (User, error)
+	ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error)
 }
 
 type Config struct {
