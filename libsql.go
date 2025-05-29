@@ -45,20 +45,22 @@ func (d LibSqlADriver) Login(username, email, phone, password string) (id string
 	return id, err
 }
 
-func (d LibSqlADriver) Save(u User) error {
+func (d LibSqlADriver) Save(u User) (string, error) {
 	err := createUserTable(d, "")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	//TODO: double check fro duplicates
 
+	//TODO: make sure orm returns more than just an error
 	err = d.orm.Save(&u, "users")
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	//HACK: i want to get this from the database not the object passed in
+	return u.Id, nil
 }
 
 func (d LibSqlADriver) Update(u User) error {
@@ -73,8 +75,8 @@ func (d LibSqlADriver) Read(id string, includeProfile bool) (User, error) {
 	return User{}, nil
 }
 
-func (d LibSqlADriver) ReadNonCritical(id string, includeProfile bool) (User, error) {
-	return User{}, nil
+func (d LibSqlADriver) ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error) {
+	return UserNonConfidential{}, nil
 }
 
 // Check is table exists in the database

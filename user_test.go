@@ -3,6 +3,7 @@ package gop
 import (
 	"github.com/racg0092/gop/rdb"
 	_ "modernc.org/sqlite"
+
 	// _ "github.com/tursodatabase/go-libsql"
 	"os"
 	"testing"
@@ -36,12 +37,18 @@ func TestMongoUser(t *testing.T) {
 		FirsName:  "Richard",
 		LastName:  "Chapman",
 		Phone:     "150f25440094",
-		Password:  "password123#foobarbarbar",
-		Password2: "password123#foobarbarbar",
+		Password:  "password123#foobarBarbar",
+		Password2: "password123#foobarBarbar",
 	}
 
-	e = u.Save(d)
+	id, e := u.Save(d)
 	if e != nil {
 		t.Error(e)
 	}
+	t.Log("user id", id)
+	userdata, e := d.ReadNonCritical(id, false)
+	if e != nil {
+		t.Error(e)
+	}
+	t.Log(userdata)
 }
