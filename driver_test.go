@@ -25,13 +25,13 @@ func TestDriver(t *testing.T) {
 		}
 
 		u := User{
-			Username: "jdoes00",
-			FirsName: "Jon",
-			LastName: "Doe",
-			Password: "running with the lions in the jungle 0033",
-			Email:    "jdoe@email.com",
-			DOB:      dob,
-			Phone:    "+19999999999",
+			Username:  "jdoes00",
+			FirstName: "Jon",
+			LastName:  "Doe",
+			Password:  "running with the lions in the jungle 0033",
+			Email:     "jdoe@email.com",
+			DOB:       dob,
+			Phone:     "+19999999999",
 		}
 
 		if _, err := u.Save(d); err != nil {
@@ -52,13 +52,13 @@ func TestDriver(t *testing.T) {
 		}
 
 		u := User{
-			Username: "jdoes00",
-			FirsName: "Jon",
-			LastName: "Doe",
-			Password: "running with the lions in the jungle 0033",
-			Email:    "jdoe@email.com",
-			DOB:      dob,
-			Phone:    "+19999999999",
+			Username:  "jdoes00",
+			FirstName: "Jon",
+			LastName:  "Doe",
+			Password:  "running with the lions in the jungle 0033",
+			Email:     "jdoe@email.com",
+			DOB:       dob,
+			Phone:     "+19999999999",
 		}
 
 		_, err = u.Save(d)

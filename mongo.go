@@ -150,7 +150,6 @@ func (md MongoADriver) Read(id string, includeProfile bool) (User, error) {
 }
 
 func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error) {
-	//TODO: finish non critical read
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
 

@@ -34,7 +34,7 @@ func TestMongoUser(t *testing.T) {
 
 	u := User{
 		Email:     "richard@test.email",
-		FirsName:  "Richard",
+		FirstName: "Richard",
 		LastName:  "Chapman",
 		Phone:     "150f25440094",
 		Password:  "password123#foobarBarbar",
