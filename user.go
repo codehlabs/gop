@@ -66,6 +66,9 @@ type User struct {
 	TwoFactorEnabled    bool          `bson:"two_factor_enabled" sql:"two_factor_enabled,int"`
 	LastPasswordChange  time.Time     `bson:"last_password_change" sql:"last_password_change,integer"`
 
+	//NOTE: ANALITYCS
+	Visits int32 `bson:"visits"`
+
 	//NOTE: may not include them
 	TermsAcceptedAt time.Time `bson:"terms_accepted_at" sql:"terms_accepted_at,integer"`
 }
