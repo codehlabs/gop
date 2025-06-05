@@ -67,7 +67,7 @@ type User struct {
 	LastPasswordChange  time.Time     `bson:"last_password_change" sql:"last_password_change,integer"`
 
 	//NOTE: ANALITYCS
-	Visits int32 `bson:"visits"`
+	Visits int32 `bson:"visits" sql:"visits,integer"`
 
 	//NOTE: may not include them
 	TermsAcceptedAt time.Time `bson:"terms_accepted_at" sql:"terms_accepted_at,integer"`
