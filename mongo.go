@@ -87,7 +87,7 @@ func (md MongoADriver) Login(username, email, phone string, password string) (id
 }
 
 func (md MongoADriver) Save(u User) (string, error) {
-	//TODO: finish logic that returns id
+	// TODO: finish logic that returns id
 	if e := md.connect(); e != nil {
 		return "", e
 	}
@@ -145,8 +145,46 @@ func (md MongoADriver) Delete(id string) error {
 }
 
 func (md MongoADriver) Read(id string, includeProfile bool) (User, error) {
-	//TODO: need to finish this one
-	return User{}, nil
+	filter := bson.M{"_id": id}
+	return md.read(filter, includeProfile)
+}
+
+// Reads user data from database
+func (md MongoADriver) read(filter bson.M, includeProfile bool) (User, error) {
+	e := md.connect()
+	if e != nil {
+		return User{}, e
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	projection := bson.M{
+		"username":  1,
+		"firstname": 1,
+		"lastname":  1,
+		"email":     1,
+		"phone":     1,
+		"dob":       1,
+		"address":   1,
+	}
+
+	if includeProfile {
+		projection["profile"] = 1
+	}
+
+	opts := options.FindOne().SetProjection(projection)
+
+	srs := md.collection.FindOne(ctx, filter, opts)
+
+	var user User
+	e = srs.Decode(&user)
+
+	return user, e
+}
+
+func (md MongoADriver) ReadByUsername(username string) (User, error) {
+	filter := bson.M{"username": username}
+	return md.read(filter, false)
 }
 
 func (md MongoADriver) ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error) {

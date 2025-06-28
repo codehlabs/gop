@@ -1,8 +1,11 @@
 module github.com/racg0092/gop
 
-go 1.23.0
+go 1.24.0
+
+toolchain go1.24.4
 
 require (
+	github.com/chapgx/assert v1.2.2
 	go.mongodb.org/mongo-driver v1.17.2
 	golang.org/x/crypto v0.38.0
 	modernc.org/sqlite v1.37.1

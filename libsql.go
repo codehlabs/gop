@@ -41,7 +41,6 @@ func NewLibSqlADriver(dbpath string) (*LibSqlADriver, error) {
 }
 
 func (d LibSqlADriver) Login(username, email, phone, password string) (id string, err error) {
-
 	return id, err
 }
 
@@ -51,15 +50,15 @@ func (d LibSqlADriver) Save(u User) (string, error) {
 		return "", err
 	}
 
-	//TODO: double check fro duplicates
+	// TODO: double check fro duplicates
 
-	//TODO: make sure orm returns more than just an error
+	// TODO: make sure orm returns more than just an error
 	err = d.orm.Save(&u, "users")
 	if err != nil {
 		return "", err
 	}
 
-	//HACK: i want to get this from the database not the object passed in
+	// HACK: i want to get this from the database not the object passed in
 	return u.Id, nil
 }
 
@@ -72,6 +71,10 @@ func (d LibSqlADriver) Delete(id string) error {
 }
 
 func (d LibSqlADriver) Read(id string, includeProfile bool) (User, error) {
+	return User{}, nil
+}
+
+func (d LibSqlADriver) ReadByUsername(id string) (User, error) {
 	return User{}, nil
 }
 
@@ -119,7 +122,7 @@ func createUserTable(driver LibSqlADriver, tablename string) error {
 
 // Checks if there are any duplicates in the database
 func checkIfDup(driver ActionDriver, config *DriverBehavior, u User) error {
-	//NOTE: may need to pass in table to make it explicit instead of implicit
+	// NOTE: may need to pass in table to make it explicit instead of implicit
 	db := driver.Db()
 
 	if db == nil {
