@@ -8,9 +8,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/argon2"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/argon2"
 )
 
 type HAlgo int
@@ -28,8 +29,11 @@ type Db interface {
 	// Delete user
 	Delete(id string) error
 
-	// Read everything excluding only the password
+	// Read essential user information. Looks up user by id
 	Read(id string, includeProfile bool) (User, error)
+
+	// Reads essential user information. Looks up user by username
+	ReadByUsername(username string) (User, error)
 
 	// Read user data excluding secure data
 	ReadNonCritical(id string, includeProfile bool) (UserNonConfidential, error)

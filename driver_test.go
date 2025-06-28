@@ -4,17 +4,17 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	. "github.com/chapgx/assert"
 )
 
 func TestDriver(t *testing.T) {
-
 	t.Run("mongo_driver", func(t *testing.T) {
 		d, err := NewDriver(MONGO, DriverConfig{
 			Conn:       os.Getenv("mdb"),
 			Database:   "d",
 			Collection: "user",
 		})
-
 		if err != nil {
 			t.Error(err)
 		}
@@ -29,6 +29,7 @@ func TestDriver(t *testing.T) {
 			FirstName: "Jon",
 			LastName:  "Doe",
 			Password:  "running with the lions in the jungle 0033",
+			Password2: "running with the lions in the jungle 0033",
 			Email:     "jdoe@email.com",
 			DOB:       dob,
 			Phone:     "+19999999999",
@@ -37,7 +38,24 @@ func TestDriver(t *testing.T) {
 		if _, err := u.Save(d); err != nil {
 			t.Error(err)
 		}
+	})
 
+	t.Run("mongo_ad_read", func(t *testing.T) {
+		d, e := NewDriver(MONGO, DriverConfig{
+			Conn:       os.Getenv("mdb"),
+			Database:   "d",
+			Collection: "user",
+		})
+
+		AssertT(t, e == nil, "new driver failed")
+
+		u, e := d.ReadByUsername("jdoes00")
+
+		AssertT(t, e == nil, "error reading user data by username")
+
+		_, e = d.Read(u.Id, false)
+
+		AssertT(t, e == nil, "erro reading user data by id")
 	})
 
 	t.Run("libsql_driver", func(t *testing.T) {
@@ -66,7 +84,6 @@ func TestDriver(t *testing.T) {
 			t.Error(err)
 		}
 	})
-
 }
 
 func TestUtilsLibSql(t *testing.T) {
@@ -78,7 +95,6 @@ func TestUtilsLibSql(t *testing.T) {
 
 	t.Run("table not found", func(t *testing.T) {
 		exist, err := tableExists(driver, "foos")
-
 		if err != nil {
 			t.Error(err)
 		}
@@ -86,7 +102,6 @@ func TestUtilsLibSql(t *testing.T) {
 		if exist == true {
 			t.Errorf("expected foos to be false but got %v", exist)
 		}
-
 	})
 
 	t.Run("table found", func(t *testing.T) {
@@ -121,10 +136,8 @@ func TestUtilsLibSql(t *testing.T) {
 		}
 
 		err := checkIfDup(driver, &DriverBehavior{true, true, true}, u)
-
 		if err != nil {
 			t.Error(err)
 		}
 	})
-
 }

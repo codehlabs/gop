@@ -45,7 +45,6 @@ type DriverConfig struct {
 
 // Check if any of the struct fields has the default initialization value
 func (i DriverConfig) IsDefault() bool {
-
 	if i.Conn == "" {
 		return true
 	}
